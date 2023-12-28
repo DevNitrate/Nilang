@@ -80,7 +80,7 @@ proc parse*(file: string) =
             if token[0] == "symbol":
                 if token[1] in symbols:
                     if token[1] == "print":
-                        if line.len > 1:
+                        if line.len > 2:
                             if line[2].tokenType == "expression":
                                 var x: float = parseFloat(line[1].token)
                                 var y: float = parseFloat(line[3].token)
@@ -116,7 +116,7 @@ proc parse*(file: string) =
                                 echo line[t+1].token
                         break
                     elif token.token == "var":
-                        if contains(line[i+1].token, re"[.a-zA-Z0-9_]+"):
+                        if contains(line[t+1].token, re"[.a-zA-Z0-9_]+"):
                             if line.len > 3:
                                 if line[3].tokenType == "expression":
                                     var x: float = parseFloat(line[2].token)
@@ -145,9 +145,31 @@ proc parse*(file: string) =
                             error("variable name isn't valid", i+1)
                         break
                 else:
+                    #reassign variables
                     var varExists: bool = false
                     var varIndex: int = 0
-                    var varValue: string = line[1].token
+                    var varValue: string = ""
+
+                    if line.len > 2:
+                        if line[2].tokenType == "expression":
+                            var x: float = parseFloat(line[1].token)
+                            var y: float = parseFloat(line[3].token)
+
+                            if line[2].token == "+":
+                                let value = x + y
+                                varValue = $value
+                            elif line[2].token == "-":
+                                let value = x - y
+                                varValue = $value
+                            elif line[2].token == "*":
+                                let value = x * y
+                                varValue = $value
+                            elif line[2].token == "/":
+                                let value = x / y
+                                varValue = $value
+                    else:
+                        let value = line[1].token
+                        varValue = $value
 
                     for k, v in vars:
                         if v.name == token[1]:
